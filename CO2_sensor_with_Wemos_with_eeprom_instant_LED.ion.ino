@@ -11,9 +11,9 @@ A0 -- Analog output
 */
 
 // replace with your channel’s thingspeak API key and your SSID and password
-String apiKey = "FN8SWACJSOY6PGO7";
-const char* ssid = "SGHF-guest-net";
-const char* password = "SvndbrggmHF3";
+String apiKey = "";
+const char* ssid = "";
+const char* password = "";
 const char* server = "api.thingspeak.com";
 WiFiClient client;
 const long limit = 1000; //ppm
@@ -48,7 +48,7 @@ Serial.println ("trying to connect to default");
    }
 
 if (WiFi.status() != WL_CONNECTED) {
-  WiFi.begin("camilla-PC-Wireless", "n33gvsn33gvs");
+  WiFi.begin("SSID", "password");
   Serial.println ("trying to connect home");
     for (int i=0; i <= 3; i++){
     digitalWrite(D4, HIGH);   // turn the LED on (HIGH is the voltage level)
