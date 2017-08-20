@@ -1,13 +1,15 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
-// LED i Wemos pin D10 (D8 i koden) lyser permanent, når CO2 bliver over 1000 ppm.
-// I frisk luft: Knap i D8 (D3 i koden) presses, ppm sættes til 400, blinker LED i D10 10 gange 
-// indbygget LED (D4 i koden) blinker, når der sendes til net. 
+// when turned on: wemos will try to connect to internet via one of two wifi's.
+// Wemos LED flashing rapidly indicates, connection to wifi has been established.
+// LED i Wemos is lit up, when CO2 level exceeds 1000 ppm.
+// In fresh air, press button connecting D8 (D3 in code) =>, ppm measure is set to 400 ppm, LED on wemos flashes 10 times. 
+// Wemos LED flashes on time when it transmits to thingssepak-site. 
 /*
 Wemos D1 -- MH-Z14
-5V -- VCC
-GND -- GND
-A0 -- Analog output
+5V -- VCC (red wire)
+GND -- GND (black wire)
+A0 -- Analog output (white wire)
 */
 
 // replace with your channel’s thingspeak API key and your SSID and password
@@ -19,9 +21,9 @@ WiFiClient client;
 const long limit = 1000; //ppm
 long co2volt;
 long co2ppm = 400;
-int co2fresh = 105; //volt i frisk luft, hvis der ikke er gemt andet i eeprom. Er x½ da EEPROM max kan holde 244.
+int co2fresh = 100; //voltage-reading in fresh air, if not saved in EERPOM. Is divided by 2, as EEPROM  limit is 244.
 long previousMillis = 0;
-const long interval = 1000000; //ca. 20 minutter
+const long interval = 100000; //ca. 2 minuts interval between posting to thingsspeak
 int address = 0;
 
 void setup()
@@ -32,7 +34,7 @@ pinMode(D3, INPUT_PULLUP); //push button betw D3 and GND.
 pinMode(D4, OUTPUT); //internal LED
 pinMode(D8, OUTPUT);
 delay(1000);
-co2fresh = EEPROM.read(address); //hente værdi i eeprom. Må max være 244, skal derfor ganges med 10
+co2fresh = EEPROM.read(address); //get the value in eeprom. Max is 244, hence multiply by 2.
 delay(100);
 
 
@@ -72,9 +74,8 @@ if (WiFi.status() == WL_CONNECTED) {
 
 void loop()
 {
-digitalWrite(D8, LOW);    // turn the LED off by making the voltage LOW
 co2volt=analogRead(A0);
-co2ppm = map(co2volt, co2fresh*2, 600, 400, 5000); //co2fresh ganges med to, da co2fresh blev /2 da den blev gemt
+co2ppm = map(co2volt, co2fresh*2, 600, 400, 5000); //co2fresh multiply by 2, as co2fresh was /2 when it was stored
   if (co2ppm>limit) {
 digitalWrite(D8, HIGH); }  // turn the LED on (HIGH is the voltage level)
 else {
@@ -86,12 +87,12 @@ else {
   
 previousMillis = currentMillis;
 co2volt=analogRead(A0);
-co2ppm = map(co2volt, co2fresh*2, 600, 400, 5000); //co2fresh ganges med to, da co2fresh blev /2 da den blev gemt
+co2ppm = map(co2volt, co2fresh*2, 600, 400, 5000); //co2fresh multiplied by 2, as co2fresh was /2 when stored.
 Serial.println(co2fresh);
 Serial.println(co2volt);
 Serial.println(co2ppm);
  
-if (client.connect(server,80) && (co2ppm>0)) { // ved opstart kan forekomme værdier på -10000 ppm
+if (client.connect(server,80) && (co2ppm>0)) { // at initialization, readings of -10000 ppm may occur
 String postStr = apiKey;
 postStr +="&field1=";
 postStr += String(co2ppm);
@@ -120,17 +121,17 @@ client.stop();
 // 20 seconds to be safe. Set 'interval' accordingly.
  }
  
- boolean btnPressed = !digitalRead(D3); //is button pressed?
+ boolean btnPressed = !digitalRead(D3); //is button pressed? Press in fresh air.
     if(btnPressed == true)
     {
-co2fresh=analogRead(A0)/2; //divideres med to for at den kan være i EEPROM. 
-EEPROM.write(address, co2fresh); //gem værdi i eeprom. Må max være 244.
+co2fresh=analogRead(A0)/2; //divided by 2, in order to stay within eeprom limit of 244. 
+EEPROM.write(address, co2fresh); // store value in eeprom. Max 244.
 delay(100);
 EEPROM.commit();
  for (int i=0; i <= 10; i++){
-digitalWrite(D8, HIGH);   // turn the LED on (HIGH is the voltage level)
+digitalWrite(D4, HIGH);   // turn the LED on (HIGH is the voltage level)
 delay(100);              // wait for a second
-digitalWrite(D8, LOW);    // turn the LED off by making the voltage LOW
+digitalWrite(D4, LOW);    // turn the LED off by making the voltage LOW
 delay(100);
     }
     }
