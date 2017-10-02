@@ -31,7 +31,6 @@ Serial.begin(115200);
 pinMode(D3, INPUT_PULLUP); //push button betw D3 and GND.
 pinMode(D4, OUTPUT); //internal LED
 pinMode(D8, OUTPUT);
-delay(1000);
 co2fresh = EEPROM.read(address); //hente værdi i eeprom. Må max være 244, skal derfor ganges med 2
 delay(100);
 
@@ -68,6 +67,7 @@ if (WiFi.status() == WL_CONNECTED) {
    }
 }
 }
+delay(120000); // give time for the sensor to initialize.
 }
 
 void loop()
