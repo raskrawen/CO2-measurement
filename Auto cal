@@ -88,12 +88,15 @@ delay(10);
 previousMillis = currentMillis;
 co2volt=analogRead(A0);
 co2ppm = map(co2volt, co2fresh*2, 600, 400, 5000); //co2fresh ganges med to, da co2fresh blev /2 da den blev gemt
+Serial.print("CO2fresh: ");
 Serial.println(co2fresh);
+Serial.print("CO2volt: ");
 Serial.println(co2volt);
+Serial.print("CO2ppm: ");
 Serial.println(co2ppm);
 
-if (co2ppm<co2fresh*2) { //hvis målt co2 indhold er mindre end reference-værdien.
-  co2fresh = co2ppm/2;
+if (co2volt<co2fresh*2) { //hvis målt co2 indhold (i volt) bliver mindre end reference-værdien.
+  co2fresh = co2volt/2;
   EEPROM.write(address, co2fresh); //gem værdi i eeprom. Må max være 244.
   delay(100);
   EEPROM.commit();
