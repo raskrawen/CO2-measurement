@@ -1,7 +1,7 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 // LED i Wemos pin D8 til D13 (D3 til D8 i koden) lyser , når CO2 går over hhv. 500, 750, 1000, 1250, 1500, 1750 ppm.
-// I frisk luft: Forbind D7 (D2 i koden) med GND, ppm sættes til 400, blinker indbygget LED (D4 i koden) 10 gange
+// I frisk luft: Forbind D14 (D2 i koden) med GND, ppm sættes til 400, blinker indbygget LED (D4 i koden) 10 gange
 // indbygget LED (D4 i koden) blinker, når der sendes til net.
 /*
   Wemos D1 -- MH-Z14
@@ -31,7 +31,7 @@ long co2volt;
 long co2ppm = 400;
 int co2fresh = 105; //volt i frisk luft, hvis der ikke er gemt andet i eeprom. Er x½ da EEPROM max kan holde 244.
 long previousMillis = 0;
-const long interval = 500000; //100000 = ca. 2 minutter; 1000000 = ca. 16 minutter.
+const long interval = 100000; //10000 = 
 int address = 0;
 int k; //loop that accumulates reference values.
 long sumOfData = 0;
@@ -117,7 +117,7 @@ void loop()
   if (co2ppm > 1725) {
     digitalWrite(D3, HIGH); // turn the LED on (HIGH is the voltage level)
   }
-  delay(10);
+  delay(100);
 
 
 unsigned long currentMillis = millis();
